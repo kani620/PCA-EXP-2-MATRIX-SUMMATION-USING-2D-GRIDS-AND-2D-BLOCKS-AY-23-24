@@ -1,6 +1,6 @@
 # PCA-EXP-2-Matrix-Summation-using-2D-Grids-and-2D-Blocks-AY-25-26
 
-<h3>ENTER YOUR NAME  : Selva Kani R G</h3>
+<h3>ENTER YOUR NAME  : Selva Kani R </h3>
 <h3>ENTER YOUR REGISTER NO : 2305002020</h3>
 <h3>EX. NO : 02</h3>
 <h3>DATE : </h3>
@@ -37,8 +37,8 @@ Google Colab with NVCC Compiler
 
 ## PROGRAM:
 ```
-Developed By : Sriram Gopalan G
-Register No. : 212222230149
+Developed By : Selva Kani R
+Register No. : 23005002020
 ```
 
 ```
