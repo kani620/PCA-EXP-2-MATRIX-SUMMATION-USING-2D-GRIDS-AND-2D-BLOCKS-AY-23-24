@@ -1,23 +1,20 @@
-# PCA-EXP-2-Matrix-Summation-using-2D-Grids-and-2D-Blocks-AY-25-26
+# PCA-EXP-2-Matrix-Summation-using-2D-Grids-and-2D-Blocks
 
-<h3>ENTER YOUR NAME  : Selva Kani R </h3>
-<h3>ENTER YOUR REGISTER NO : 2305002020</h3>
-<h3>EX. NO : 02</h3>
-<h3>DATE : </h3>
-<h2> <align=center> MATRIX SUMMATION WITH A 2D GRID AND 2D BLOCKS </h2>
-    
+<h3>NAME: Selva kani R </h3>
+<h3>REGISTER NO : 2305002020</h3>
+
+<h1> <align=center> MATRIX SUMMATION WITH A 2D GRID AND 2D BLOCKS </h3>
 i.  Use the file sumMatrixOnGPU-2D-grid-2D-block.cu
-
 ii. Matrix summation with a 2D grid and 2D blocks. Adapt it to integer matrix addition. Find the best execution configuration. </h3>
 
 ## AIM:
-
 To perform  matrix summation with a 2D grid and 2D blocks and adapting it to integer matrix addition.
 
 ## EQUIPMENTS REQUIRED:
-
 Hardware – PCs with NVIDIA GPU & CUDA NVCC
 Google Colab with NVCC Compiler
+
+
 
 
 ## PROCEDURE:
@@ -37,12 +34,7 @@ Google Colab with NVCC Compiler
 
 ## PROGRAM:
 ```
-Developed By : Selva Kani R
-Register No. : 23005002020
-```
-
-```
-%%cuda 
+%%cuda
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -72,6 +64,9 @@ Register No. : 23005002020
         exit(1);                                                               \
     }                                                                          \
 }
+//The CHECK_CUBLAS macro is used in C/C++ programs to handle errors that might
+// occur when calling functions from the cuBLAS library,
+//which is a GPU-accelerated library for basic linear algebra operations on NVIDIA GPUs.
 
 #define CHECK_CURAND(call)                                                     \
 {                                                                              \
@@ -95,6 +90,11 @@ Register No. : 23005002020
     }                                                                          \
 }
 
+//he CHECK_CURAND macro is similar to the CHECK_CUBLAS macro,
+//but it is designed for error handling when using the cuRAND library,
+//which is a GPU-accelerated library for generating random numbers on
+//NVIDIA GPUs.
+
 #define CHECK_CUSPARSE(call)                                                   \
 {                                                                              \
     cusparseStatus_t err;                                                      \
@@ -110,6 +110,16 @@ Register No. : 23005002020
         exit(1);                                                               \
     }                                                                          \
 }
+//The CHECK_CUSPARSE macro is designed to handle error checking when calling
+//functions from the cuSPARSE library, which is part of NVIDIA's CUDA Toolkit
+//and provides GPU-accelerated sparse matrix operations.
+//This macro checks whether a cuSPARSE function call succeeds or fails, and if
+//it fails, it reports the error and terminates the program.
+//he cuSPARSE library is a GPU-accelerated library within NVIDIA's CUDA Toolkit
+//designed specifically for sparse matrix operations.
+//Sparse matrices are matrices in which most of the elements are zero,
+//and they are commonly used in scientific computing, machine learning,
+//and data analytics to efficiently store and compute data.
 
 inline double seconds()
 {
@@ -120,34 +130,24 @@ inline double seconds()
 }
 
 #endif // _COMMON_H
-
-
-
-/*
- * This example demonstrates a simple vector sum on the GPU and on the host.
- * sumArraysOnGPU splits the work of the vector sum across CUDA threads on the
- * GPU. A 2D thread block and 2D grid are used. sumArraysOnHost sequentially
- * iterates through vector elements on the host.
- */
-
-void initialData(int *ip, const int size)
+void initialData(float *ip, const int size)
 {
     int i;
 
     for(i = 0; i < size; i++)
     {
-        ip[i] = (int)(rand() & 0xFF) / 10.0f;
+        ip[i] = (float)(rand() & 0xFF) / 10.0f;
     }
 
     return;
 }
 
-void sumMatrixOnHost(int *A, int *B, int *C, const int nx,
+void sumMatrixOnHost(float *A, float *B, float *C, const int nx,
                      const int ny)
 {
-    int *ia = A;
-    int *ib = B;
-    int *ic = C;
+    float *ia = A;
+    float *ib = B;
+    float *ic = C;
 
     for (int iy = 0; iy < ny; iy++)
     {
@@ -166,7 +166,7 @@ void sumMatrixOnHost(int *A, int *B, int *C, const int nx,
 }
 
 
-void checkResult(int *hostRef, int *gpuRef, const int N)
+void checkResult(float *hostRef, float *gpuRef, const int N)
 {
     double epsilon = 1.0E-8;
     bool match = 1;
@@ -176,7 +176,7 @@ void checkResult(int *hostRef, int *gpuRef, const int N)
         if (abs(hostRef[i] - gpuRef[i]) > epsilon)
         {
             match = 0;
-            printf("host %d gpu %d\n", hostRef[i], gpuRef[i]);
+            printf("host %f gpu %f\n", hostRef[i], gpuRef[i]);
             break;
         }
     }
@@ -187,8 +187,7 @@ void checkResult(int *hostRef, int *gpuRef, const int N)
         printf("Arrays do not match.\n\n");
 }
 
-// grid 2D block 2D
-__global__ void sumMatrixOnGPU2D(int *A, int *B, int *C, int NX, int NY)
+__global__ void sumMatrixOnGPU2D(float *A, float *B, float *C, int NX, int NY)
 {
     unsigned int ix = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned int iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -199,6 +198,7 @@ __global__ void sumMatrixOnGPU2D(int *A, int *B, int *C, int NX, int NY)
         C[idx] = A[idx] + B[idx];
     }
 }
+
 
 int main(int argc, char **argv)
 {
@@ -220,11 +220,11 @@ int main(int argc, char **argv)
     printf("Matrix size: nx %d ny %d\n", nx, ny);
 
     // malloc host memory
-    int *h_A, *h_B, *hostRef, *gpuRef;
-    h_A = (int *)malloc(nBytes);
-    h_B = (int *)malloc(nBytes);
-    hostRef = (int *)malloc(nBytes);
-    gpuRef = (int *)malloc(nBytes);
+    float *h_A, *h_B, *hostRef, *gpuRef;
+    h_A = (float *)malloc(nBytes);
+    h_B = (float *)malloc(nBytes);
+    hostRef = (float *)malloc(nBytes);
+    gpuRef = (float *)malloc(nBytes);
 
     // initialize data at host side
     double iStart = seconds();
@@ -243,7 +243,7 @@ int main(int argc, char **argv)
     printf("sumMatrixOnHost elapsed %f sec\n", iElaps);
 
     // malloc device global memory
-    int *d_MatA, *d_MatB, *d_MatC;
+    float *d_MatA, *d_MatB, *d_MatC;
     CHECK(cudaMalloc((void **)&d_MatA, nBytes));
     CHECK(cudaMalloc((void **)&d_MatB, nBytes));
     CHECK(cudaMalloc((void **)&d_MatC, nBytes));
@@ -256,11 +256,24 @@ int main(int argc, char **argv)
     int dimx = 32;
     int dimy = 32;
     dim3 block(dimx, dimy);
-    dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
+    dim3 grid((nx + block.x - 1) / block.x,
+          (ny + block.y - 1) / block.y);
 
-    iStart = seconds();
-    sumMatrixOnGPU2D<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
-    CHECK(cudaDeviceSynchronize());
+iStart = seconds();
+
+sumMatrixOnGPU2D<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
+
+CHECK(cudaDeviceSynchronize());
+
+
+
+
+
+   // dim3 block(dimx, dimy);
+   // dim3 grid((nx + block.x - 1) / block.x, (ny + block.y - 1) / block.y);
+   // iStart = seconds();
+  //  sumMatrixOnGPU2D<<<512,32>>>(d_MatA, d_MatB, d_MatC, nx, ny);
+  //  CHECK(cudaDeviceSynchronize());
     iElaps = seconds() - iStart;
     printf("sumMatrixOnGPU2D <<<(%d,%d), (%d,%d)>>> elapsed %f sec\n", grid.x,
            grid.y,
@@ -292,13 +305,11 @@ int main(int argc, char **argv)
 }
 ```
 
-
 ## OUTPUT:
 
-<img width="613" height="122" alt="image" src="https://github.com/user-attachments/assets/dd211662-b5df-4550-ad75-6fde13719898" />
+<img width="830" height="156" alt="image" src="https://github.com/user-attachments/assets/efec0c57-c6a0-42c1-b015-006e6f0f6896" />
 
 
 
 ## RESULT:
-
-The host took 0.862632 seconds to complete it’s computation, while the GPU outperforms the host and completes the computation in 0.118365 seconds. Therefore, float variables in the GPU will result in the best possible result. Thus, matrix summation using 2D grids and 2D blocks has been performed successfully.
+The host took "0.843207" seconds to complete it’s computation, while the GPU outperforms the host and completes the computation in "0.104236" seconds. Therefore, float variables in the GPU will result in the best possible result. Thus, matrix summation using 2D grids and 2D blocks has been performed successfully.
